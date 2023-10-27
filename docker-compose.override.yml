@@ -1,0 +1,36 @@
+version: "3.7"
+services:
+  # Server backend
+  terraforming-mars:
+    container_name: terraforming-mars
+    build: ./
+    ports:
+      - "8080:8080"
+    # Ensure postgres is running before starting this container
+    depends_on:
+      - mars-postgres
+    environment:
+      POSTGRES_HOST: postgresql://tfm:tfm@mars-postgres/terraforming-mars?sslmode=disable
+    networks:
+      - default
+    volumes: !reset []
+
+  # Production database
+  mars-postgres:
+    image: postgres:14.5
+    environment:
+      POSTGRES_USER: tfm
+      POSTGRES_PASSWORD: tfm
+      POSTGRES_DB: terraforming-mars
+    ports:
+      - "5433:5432"
+    volumes:
+      - tfm-pgdata:/var/lib/postgresql/data
+    networks:
+      - default
+
+volumes:
+  tfm-pgdata:
+
+networks:
+  default:
